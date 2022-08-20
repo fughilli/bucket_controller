@@ -1,8 +1,6 @@
 #include "display.h"
 
 #include <FastLED.h>
-#include <cstdio>
-#include "HardwareSerial.h"
 
 #include <cmath>
 
@@ -11,15 +9,15 @@ namespace {
 constexpr int kWidth = 16;
 constexpr int kHeight = 16;
 
-int8_t kXLeft[400]{};
-uint8_t kScale[400]{};
+int8_t kXLeft[4000]{};
+uint8_t kScale[4000]{};
 
 void MaybeInitLuts() {
   static bool luts_init = false;
   if (luts_init) return;
 
-  for (int i = 0; i < 400; ++i) {
-    const float x = std::sqrt(i);
+  for (int i = 0; i < 4000; ++i) {
+    const float x = std::sqrt(i / 10.0f);
     float ipart = 0;
     kScale[i] = 255 * std::modf(x, &ipart);
     kXLeft[i] = x;
@@ -54,38 +52,45 @@ void Display::SetPixel(int x, int y, CRGB color) {
 }
 
 void Display::Circle(int x, int y, float r, CRGB color) {
+  if (r <= 1) {
+    CRGB scaled_a = color, scaled_b = color;
+    scaled_a.nscale8(255 * r);
+    scaled_b.nscale8(255 * (1.0f - r));
+    SetPixel(x + 1, y, scaled_a);
+    SetPixel(x - 1, y, scaled_a);
+    SetPixel(x, y + 1, scaled_a);
+    SetPixel(x, y - 1, scaled_a);
+    SetPixel(x, y, scaled_b);
+    return;
+  }
+
   if (r > 20) return;
 
   int y_off = 0;
   int x_off = r;
   while (y_off < x_off) {
-    int arg = r * r - y_off * y_off;
+    int arg = (r * r - y_off * y_off) * 10.0f;
     x_off = kXLeft[arg];
     uint8_t scale = kScale[arg];
-
-    char print_buf[64];
-    snprintf(print_buf, 64, "arg = %d, scale = %d", arg, scale);
     CRGB scaled_a = color, scaled_b = color;
-    scaled_a.nscale8(255-scale);
+    scaled_a.nscale8(255 - scale);
     scaled_b.nscale8(scale);
-
-    Serial.println(print_buf);
-    SetPixel(x + x_off,       y + y_off,        scaled_a);
-    SetPixel(x + 1 + x_off,   y + y_off,        scaled_b);
-    SetPixel(x - x_off,       y + y_off,        scaled_a);
-    SetPixel(x - (1 + x_off), y + y_off,        scaled_b);
-    SetPixel(x + x_off,       y - y_off,        scaled_a);
-    SetPixel(x + 1 + x_off,   y - y_off,        scaled_b);
-    SetPixel(x - x_off,       y - y_off,        scaled_a);
-    SetPixel(x - (1 + x_off), y - y_off,        scaled_b);
-    SetPixel(y + y_off,       x + x_off,        scaled_a);
-    SetPixel(y + y_off,       x + 1 + x_off,    scaled_b);
-    SetPixel(y + y_off,       x - x_off,        scaled_a);
-    SetPixel(y + y_off,       x - (1 + x_off),  scaled_b);
-    SetPixel(y - y_off,       x + x_off,        scaled_a);
-    SetPixel(y - y_off,       x + 1 + x_off,    scaled_b);
-    SetPixel(y - y_off,       x - x_off,        scaled_a);
-    SetPixel(y - y_off,       x - (1 + x_off),  scaled_b);
+    SetPixel(x + x_off, y + y_off, scaled_a);
+    SetPixel(x + 1 + x_off, y + y_off, scaled_b);
+    SetPixel(x - x_off, y + y_off, scaled_a);
+    SetPixel(x - (1 + x_off), y + y_off, scaled_b);
+    SetPixel(x + x_off, y - y_off, scaled_a);
+    SetPixel(x + 1 + x_off, y - y_off, scaled_b);
+    SetPixel(x - x_off, y - y_off, scaled_a);
+    SetPixel(x - (1 + x_off), y - y_off, scaled_b);
+    SetPixel(y + y_off, x + x_off, scaled_a);
+    SetPixel(y + y_off, x + 1 + x_off, scaled_b);
+    SetPixel(y + y_off, x - x_off, scaled_a);
+    SetPixel(y + y_off, x - (1 + x_off), scaled_b);
+    SetPixel(y - y_off, x + x_off, scaled_a);
+    SetPixel(y - y_off, x + 1 + x_off, scaled_b);
+    SetPixel(y - y_off, x - x_off, scaled_a);
+    SetPixel(y - y_off, x - (1 + x_off), scaled_b);
     y_off++;
   }
 }
