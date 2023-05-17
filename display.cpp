@@ -4,10 +4,8 @@
 
 #include <cmath>
 
-namespace bikedisp {
+namespace dinodisp {
 namespace {
-constexpr int kWidth = 16;
-constexpr int kHeight = 16;
 
 int8_t kXLeft[4000]{};
 uint8_t kScale[4000]{};
@@ -29,15 +27,21 @@ void MaybeInitLuts() {
 
 void Display::Init() {
   MaybeInitLuts();
-  FastLED.addLeds<NEOPIXEL, 5>(leds_.data(), leds_.size());
+  FastLED.addLeds<NEOPIXEL, 13>(leds_.data(), leds_.size());
   FastLED.setBrightness(255);
+}
+
+void Display::SetBrightness(uint8_t brightness) {
+  FastLED.setBrightness(brightness);
 }
 
 void Display::Show() { FastLED.show(); }
 
-void Display::Clear() {
+void Display::Clear() { SetAll(CRGB::Black); }
+
+void Display::SetAll(CRGB color) {
   for (auto& led : leds_) {
-    led = CRGB::Black;
+    led = color;
   }
 }
 
@@ -45,10 +49,18 @@ void Display::SetPixel(int x, int y, CRGB color) {
   if (x < 0 || x >= kWidth || y < 0 || y >= kHeight) return;
 
   if (y % 2 == 0) {
-    leds_[y * 16 + (15 - x)] = color;
+    leds_[y * kWidth + ((kWidth - 1) - x)] = color;
   } else {
-    leds_[y * 16 + x] = color;
+    leds_[y * kWidth + x] = color;
   }
+}
+
+void Display::CircleSetPix4(int x, int y, int delta_x, int delta_y,
+                            CRGB color) {
+  SetPixel(x + delta_x, y + delta_y, color);
+  SetPixel(x - delta_x, y + delta_y, color);
+  SetPixel(x + delta_x, y - delta_y, color);
+  SetPixel(x - delta_x, y - delta_y, color);
 }
 
 void Display::Circle(int x, int y, float r, CRGB color) {
@@ -95,4 +107,4 @@ void Display::Circle(int x, int y, float r, CRGB color) {
   }
 }
 
-}  // namespace bikedisp
+}  // namespace dinodisp

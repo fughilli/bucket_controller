@@ -6,29 +6,34 @@
 #include <cmath>
 #include <limits>
 
+#include "FastLED.h"
 #include "HardwareSerial.h"
 #include "display.h"
-#include "encoder.h"
+#include "hsv2rgb.h"
 
-namespace bikedisp {
+namespace dinodisp {
 
-Encoder encoder(17, 18, 0);
 Display display;
 
 void ExtMain() {
   Serial.begin(115200);
 
-  encoder.Enable();
   display.Init();
+  display.SetBrightness(50);
 }
 
 void ExtLoop() {
-  display.Clear();
+  static uint64_t i = 0;
 
-  display.Circle(8, 8, 5 * (1 + std::sin(encoder.Count() / 256.0f)),
-                 CRGB::Red);
+  CRGB color;
+  for (uint32_t j = 0; j < display.kWidth; ++j) {
+    hsv2rgb_rainbow({((j * 255 + i * 10) / display.kWidth), 255, 255}, color);
+    display.SetPixel(j, 0, color);
+  }
 
   display.Show();
+
+  i += 1;
 }
 
-}  // namespace bikedisp
+}  // namespace dinodisp
