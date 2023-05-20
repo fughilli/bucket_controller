@@ -1,8 +1,5 @@
 #include "extmain.h"
 
-//#include <WiFi.h>
-//#include <WiFiAP.h>
-//#include <WiFiClient.h>
 #include <EEPROM.h>
 #include <stdint.h>
 
@@ -17,7 +14,6 @@
 
 namespace dinodisp {
 
-// WiFiServer server(80);
 Display display;
 
 enum class Pattern {
@@ -108,55 +104,11 @@ void ExtMain() {
   display.Init();
   display.SetBrightness(20);
 
-  // WiFi.softAP("Paintbrush");
-  // IPAddress myIP = WiFi.softAPIP();
-
-  // Serial.println();
-  // Serial.print("My IP address:");
-  // Serial.println(myIP);
-
-  // server.begin();
-  //
   update_pattern_from_eeprom();
 }
 
 void ExtLoop() {
   static uint64_t i = 0;
-
-  // WiFiClient client = server.available();
-
-  // if (client) {
-  //  String request = "";
-  //  Serial.println("New client");
-  //  while (client.connected()) {
-  //    if (client.available()) {
-  //      const char c = client.read();
-  //      Serial.print(c);
-  //      if (c == '\n') {
-  //        if (request.length() == 0) {
-  //          client.println("HTTP/1.1 200 OK");
-  //          client.println("Content-type:text/html");
-  //          client.println();
-  //          client.print("Hello world!");
-  //          client.println();
-  //          break;
-  //        } else {
-  //          request = "";
-  //        }
-  //      } else if (c != '\r') {
-  //        request += c;
-  //      }
-
-  //      if (request.endsWith("GET /red")) {
-  //        current_pattern = Pattern::kRed;
-  //      }
-  //      if (request.endsWith("GET /rainbow")) {
-  //        current_pattern = Pattern::kRainbow;
-  //      }
-  //    }
-  //  }
-  //  client.stop();
-  //}
 
   CRGB color;
 
