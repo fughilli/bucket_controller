@@ -20,8 +20,9 @@ enum class Pattern {
   kRainbow,
   kRainbowMedium,
   kRainbowFast,
-  kRedMarching,
-  kRedSpinning,
+  kRainbowStripe,
+  kRainbowStripeFast,
+  kRedStrobe,
   kRed,
   kDenseLastValue = kRed
 };
@@ -102,7 +103,7 @@ void ExtMain() {
   delay(1000);
 
   display.Init();
-  display.SetBrightness(20);
+  display.SetBrightness(255);
 
   update_pattern_from_eeprom();
 }
@@ -135,10 +136,25 @@ void ExtLoop() {
         display.SetPixel(j, 0, color);
       }
       break;
-    case Pattern::kRedMarching: {
-      int length = triangle(i / 150, 6) + 2;
+    case Pattern::kRainbowStripe:
       for (uint32_t j = 0; j < display.kWidth; ++j) {
-        if ((j + i / 30) % length < (length / 2)) {
+        hsv2rgb_rainbow(
+            {((j * 255 + (i / 10) * (255 / 2 + 2)) / display.kWidth), 255, 255},
+            color);
+        display.SetPixel(j, 0, color);
+      }
+      break;
+    case Pattern::kRainbowStripeFast:
+      for (uint32_t j = 0; j < display.kWidth; ++j) {
+        hsv2rgb_rainbow(
+            {((j * 255 + (i / 3) * (255 / 2 + 2)) / display.kWidth), 255, 255},
+            color);
+        display.SetPixel(j, 0, color);
+      }
+      break;
+    case Pattern::kRedStrobe: {
+      for (uint32_t j = 0; j < display.kWidth; ++j) {
+        if ((i / 3) % 2) {
           hsv2rgb_rainbow({0, 255, 255}, color);
           display.SetPixel(j, 0, color);
         } else {
@@ -147,19 +163,9 @@ void ExtLoop() {
       }
       break;
     }
-    case Pattern::kRedSpinning:
-      for (uint32_t j = 0; j < display.kWidth; ++j) {
-        if ((i / 10 + j) % 8 < 4) {
-          hsv2rgb_rainbow({0, 255, 255}, color);
-          display.SetPixel(j, 0, color);
-        } else {
-          display.SetPixel(j, 0, {0, 0, 0});
-        }
-      }
-      break;
     case Pattern::kRed:
       for (uint32_t j = 0; j < display.kWidth; ++j) {
-        hsv2rgb_rainbow({0, 255, 100 + (sin(i / 500.0f) + 1) / 2 * 155}, color);
+        hsv2rgb_rainbow({0, 255, 255}, color);
         display.SetPixel(j, 0, color);
       }
       break;

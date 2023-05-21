@@ -6,7 +6,7 @@ namespace dinodisp {
 
 class Display {
  public:
-  constexpr static int kWidth = 32;
+  constexpr static int kWidth = 1;
   constexpr static int kHeight = 1;
 
   void Init();
